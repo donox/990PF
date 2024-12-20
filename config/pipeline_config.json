@@ -1,0 +1,16 @@
+{
+    "pipeline": [
+        {
+            "step_name": "operation1",
+            "module": "operations.operation1",
+            "function": "operation1",
+            "use_intermediate_file": true
+        },
+        {
+            "step_name": "operation2",
+            "module": "operations.operation2",
+            "function": "operation2",
+            "use_intermediate_file": false
+        }
+    ]
+}
