@@ -2,8 +2,9 @@ import importlib
 import os
 import json
 
-def load_function(module_name, function_name):
+def load_function(name, function_name, pkg='operations'):
     """Dynamically loads a function from a module."""
+    module_name = pkg + '.' + name
     module = importlib.import_module(module_name)
     return getattr(module, function_name)
 

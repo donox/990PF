@@ -1,16 +1,56 @@
 {
-    "pipeline": [
-        {
-            "step_name": "operation1",
-            "module": "operations.operation1",
-            "function": "operation1",
-            "use_intermediate_file": true
-        },
-        {
-            "step_name": "operation2",
-            "module": "operations.operation2",
-            "function": "operation2",
-            "use_intermediate_file": false
-        }
-    ]
+  "pipeline": [
+    {
+      "skip_step": false,
+      "step_name": "convert_pdf_to_images",
+      "module": "convert_pdf_to_images",
+      "function": "convert_pdf_to_images",
+      "use_intermediate_file": false
+    },
+    {
+      "skip_step": true,
+      "skip_sequencing": true,
+      "step_name": "pdf_to_text_step",
+      "module": "pdf_to_text_boxes",
+      "function": "process_pdf",
+      "use_intermediate_file": true
+    },
+    {
+      "skip_step": false,
+      "skip_sequencing": true,
+      "process_steps": 1,
+      "step_name": "identify_form_elements",
+      "module": "pdf_to_text_boxes",
+      "function": "identify_form_elements",
+      "use_intermediate_file": true
+    },
+    {
+      "skip_step": true,
+      "step_name": "process_dict_step",
+      "module": "process_dict",
+      "function": "process_dict",
+      "use_intermediate_file": false
+    },
+    {
+      "skip_step": true,
+      "step_name": "process_list_step",
+      "module": "process_list",
+      "function": "process_list",
+      "use_intermediate_file": false
+    },
+    {
+      "skip_step": true,
+      "step_name": "process_directory_step",
+      "module": "process_directory",
+      "function": "process_directory",
+      "use_intermediate_file": false
+    },
+    {
+      "skip_step": true,
+      "step_name": "process_nested_step",
+      "module": "process_nested",
+      "function": "process_nested",
+      "use_intermediate_file": false
+    }
+  ]
 }
