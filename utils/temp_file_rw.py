@@ -1,4 +1,5 @@
 import json
+from utils.json_enhanced import NumpyEncoder
 import pandas as pd
 import os
 import tempfile
@@ -14,10 +15,12 @@ def write_to_temp_file(data, suffix=".json"):
     Returns:
         str: Path to the temporary file.
     """
+    encoder = NumpyEncoder()
     temp_file = tempfile.NamedTemporaryFile(delete=False, suffix=suffix)
     if suffix == ".json":
         with open(temp_file.name, 'w') as f:
-            json.dump(data, f)
+            json_str = encoder.encode(data)
+            f.write(json_str)
     elif suffix == ".csv":
         data.to_csv(temp_file.name, index=False)
     temp_file.close()

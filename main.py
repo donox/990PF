@@ -59,25 +59,34 @@ class PipelineManager:
                 self.logger.info(f"{step_name}: Using explicit input file {explicit_input}.")
                 if not os.path.exists(explicit_input):
                     raise FileNotFoundError(f"Explicit input file {explicit_input} not found.")
-                with open(explicit_input, "r") as file:
-                    input_data = json.load(file)  # Adjust for file type as needed
+                input_extension = os.path.splitext(explicit_input)[1].lower()
+                if input_extension == ".json":
+                    with open(explicit_input, "r") as file:
+                        input_data = json.load(file)  # Adjust for JSON files
+                else:
+                    input_data = explicit_input  # Pass non-JSON files as paths
+
+                # Bypass further processing if explicit input is non-JSON
+                if input_extension != ".json":
+                    self.logger.info(f"{step_name}: Skipping nested processing for non-JSON explicit input.")
+                    return self.execute_operation(step_config, input_data, step_name)
 
             # Handle intermediate JSON files with references
             if isinstance(input_data, str) and os.path.isfile(input_data):
                 self.logger.info(f"{step_name}: Processing intermediate file {input_data}.")
-                with open(input_data, "r") as file:
-                    intermediate_data = json.load(file)
-
-                # Check if the JSON contains a reference to another file
-                if "filename" in intermediate_data:
-                    tmp_file_path = intermediate_data["filename"]
-                    self.logger.info(f"{step_name}: Found referenced file {tmp_file_path}.")
-                    if not os.path.exists(tmp_file_path):
-                        raise FileNotFoundError(f"Referenced file {tmp_file_path} not found.")
-                    with open(tmp_file_path, "r") as tmp_file:
-                        input_data = json.load(tmp_file)  # Adjust for file type as needed
-                else:
-                    input_data = intermediate_data  # No referenced file, use intermediate data directly
+                # with open(input_data, "r") as file:
+                #     intermediate_data = json.load(file)
+                #
+                # # Check if the JSON contains a reference to another file
+                # if intermediate_data.get("indirect_reference", False):
+                #     tmp_file_path = intermediate_data["filename"]
+                #     self.logger.info(f"{step_name}: Found referenced file {tmp_file_path}.")
+                #     if not os.path.exists(tmp_file_path):
+                #         raise FileNotFoundError(f"Referenced file {tmp_file_path} not found.")
+                #     with open(tmp_file_path, "r") as tmp_file:
+                #         input_data = json.load(tmp_file)  # Adjust for file type as needed
+                # else:
+                #     input_data = intermediate_data  # No referenced file, use intermediate data directly
 
             if not skip:
                 # Handle dictionary (nested structure)
@@ -141,7 +150,7 @@ class PipelineManager:
                     json.dump(output_data, tmp_file)
 
                 # Write metadata JSON pointing to the /tmp file
-                metadata = {"filename": tmp_file_path}
+                metadata = {"filename": tmp_file_path, "indirect_reference": True}
                 with open(output_file, "w") as file:
                     json.dump(metadata, file)
 
@@ -168,9 +177,8 @@ class PipelineManager:
             self.logger.error(f"Pipeline execution failed: {e}")
             raise
 
-
 if __name__ == "__main__":
     pipeline = PipelineManager(config_file=os.path.join('.', "config/pipeline_config.json"))
-    infile = os.path.join(input_dir, "input_dir/example.pdf")
+    infile = os.path.join(input_dir, "/tmp/tmp45cvctw7.json")
     outfile = os.path.join(intermediates_dir, "final_output.json")
     pipeline.run_pipeline(infile, outfile)
